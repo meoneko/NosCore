@@ -56,7 +56,7 @@ namespace NosCore.Controllers
         [UsedImplicitly]
         public void MoveEquipment(MvePacket mvePacket)
         {
-            if (Session.Character.InExchangeOrTrade)
+            if (Session.Character.InExchangeOrShop)
             {
                 return;
             }
@@ -71,7 +71,7 @@ namespace NosCore.Controllers
         public void MoveItem(MviPacket mviPacket)
         {
             // check if the character is allowed to move the item
-            if (Session.Character.InExchangeOrTrade)
+            if (Session.Character.InExchangeOrShop)
             {
                 return;
             }
@@ -285,7 +285,7 @@ namespace NosCore.Controllers
             {
                 var invitem =
                     Session.Character.Inventory.LoadBySlotAndType<IItemInstance>(putPacket.Slot, putPacket.PocketType);
-                if ((invitem?.Item.IsDroppable ?? false) && !Session.Character.InExchangeOrTrade)
+                if ((invitem?.Item.IsDroppable ?? false) && !Session.Character.InExchangeOrShop)
                 {
                     if (putPacket.Amount > 0 && putPacket.Amount <= _worldConfiguration.MaxItemAmount)
                     {
@@ -386,7 +386,7 @@ namespace NosCore.Controllers
                     break;
 
                 case RequestDeletionType.Confirmed:
-                    if (Session.Character.InExchangeOrTrade)
+                    if (Session.Character.InExchangeOrShop)
                     {
                         return;
                     }
