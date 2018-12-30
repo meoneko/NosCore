@@ -433,25 +433,6 @@ namespace NosCore.GameObject.Services.Inventory
             return true;
         }
 
-        public IItemInstance RemoveItemAmountFromInventory(short amount, Guid id)
-        {
-            var inv = this[id];
-            if (inv != null)
-            {
-                inv.Amount -= amount;
-                if (inv.Amount <= 0)
-                {
-                    TryRemove(inv.Id, out _);
-                }
-
-                return inv;
-            }
-
-            var e = new InvalidOperationException("Expected item wasn't deleted, Type or Slot did not match!");
-            _logger.Error(e.Message, e);
-            return null;
-        }
-
         private short? GetFreeSlot(PocketType type)
         {
             var backPack = IsExpanded ? 1 : 0;
@@ -467,31 +448,6 @@ namespace NosCore.GameObject.Services.Inventory
             return (short?) nextFreeSlot
                 < (type != PocketType.Miniland ? Configuration.BackpackSize + (backPack * 12) : 50)
                     ? (short?) nextFreeSlot : null;
-        }
-
-        public bool EnoughPlace(List<IItemInstance> itemInstances)
-        {
-            var place = new Dictionary<PocketType, int>();
-            foreach (var itemGroup in itemInstances.GroupBy(s => s.ItemVNum))
-            {
-                var type = itemGroup.First().Type;
-                var itemList = this.Select(s => s.Value).Where(i => i.Type == type).ToList();
-                if (!place.ContainsKey(type))
-                {
-                    place.Add(type, (type != PocketType.Miniland ? Configuration.BackpackSize + Convert.ToInt16(IsExpanded) * 12 : 50) - itemList.Count);
-                }
-
-                var amount = itemGroup.Sum(s => s.Amount);
-                var rest = amount % (type == PocketType.Equipment ? 1 : Configuration.MaxItemAmount);
-                var newSlotNeeded = itemList.Where(s => s.ItemVNum == itemGroup.Key).Sum(s => Configuration.MaxItemAmount - s.Amount) <= rest;
-                place[type] -= (amount / (type == PocketType.Equipment ? 1 : Configuration.MaxItemAmount)) + (newSlotNeeded ? 1 : 0);
-
-                if (place[type] < 0)
-                {
-                    return false;
-                }
-            }
-            return true;
         }
 
         public IItemInstance RemoveItemAmountFromInventory(short amount, Guid id)
